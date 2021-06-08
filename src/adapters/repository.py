@@ -1,5 +1,5 @@
 import abc
-from . import model
+from src.domain import model
 
 
 class AbstractRepository(abc.ABC):

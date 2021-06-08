@@ -1,4 +1,6 @@
-from . import repository, model, services
+from src.domain import model
+from src.adapters import repository
+from src.service_layer import services
 import pytest
 
 

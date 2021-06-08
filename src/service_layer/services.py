@@ -1,6 +1,7 @@
 from typing import List, Optional
 from datetime import date
-from . import model, repository
+from src.domain import model
+from src.adapters import repository
 
 
 class InvalidSku(Exception):

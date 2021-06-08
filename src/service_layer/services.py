@@ -21,7 +21,8 @@ def add_batch(
     session.commit()
 
 
-def allocate(line: model.OrderLine, repo: repository.AbstractRepository, session) -> str:
+def allocate(orderid: str, sku: str, qty: int, repo: repository.AbstractRepository, session) -> str:
+    line = model.OrderLine(orderid, sku, qty)
     batches = repo.list()
     if not is_valid_sku(line.sku, batches):
         raise InvalidSku(f'Invalid sku {line.sku}')
@@ -31,5 +32,7 @@ def allocate(line: model.OrderLine, repo: repository.AbstractRepository, session
     return batchref
 
 
-def deallocate(line: model.OrderLine, batch: model.Batch, session):
+def deallocate(orderid: str, sku: str, qty: int, batch: model.Batch, session):
+    line = model.OrderLine(orderid, sku, qty)
     batch.deallocate(line)
+    session.commit()

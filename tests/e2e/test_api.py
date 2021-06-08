@@ -3,9 +3,8 @@ from typing import Optional
 import uuid
 import pytest
 import requests
-import time
 
-from src import config
+from allocation import config
 from datetime import date
 
 

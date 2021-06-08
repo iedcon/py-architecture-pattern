@@ -9,8 +9,8 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker, clear_mappers
 
-from src.adapters.orm import metadata, start_mappers
-from src import config
+from allocation.adapters.orm import metadata, start_mappers
+from allocation import config
 
 
 @pytest.fixture
@@ -102,6 +102,6 @@ def add_stock(postgres_session):
 
 @pytest.fixture
 def restart_api():
-    (Path(__file__).parent / "flask_app.py").touch()
+    (Path(__file__).parent / "../src/allocation/entrypoints/flask_app.py").touch()
     time.sleep(0.5)
     wait_for_webapp_to_come_up()

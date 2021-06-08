@@ -1,6 +1,6 @@
-from src.domain import model
-from src.adapters import repository
-from src.service_layer import services
+from allocation.domain import model
+from allocation.adapters import repository
+from allocation.service_layer import services
 import pytest
 
 

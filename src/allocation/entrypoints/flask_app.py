@@ -3,10 +3,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 
-from src.domain import model
-from src.adapters import repository, orm
-from src.service_layer import services
-from src import config
+from allocation.domain import model
+from allocation.adapters import repository, orm
+from allocation.service_layer import services
+from allocation import config
 
 
 orm.start_mappers()

@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import date
-from src.domain import model
-from src.adapters import repository
+from allocation.domain import model
+from allocation.adapters import repository
 
 
 class InvalidSku(Exception):

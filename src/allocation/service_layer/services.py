@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import date
 from allocation.domain import model
-from allocation.service_layer import unit_of_work
+from . import unit_of_work
 
 
 class InvalidSku(Exception):
@@ -17,7 +17,6 @@ def add_batch(
     uow: unit_of_work.AbstractProductUnitOfWork
 ):
      with uow:
-        print("!!!!")
         product = uow.products.get(sku=sku)
         if product is None:
             product = model.Product(sku, batches=[])
@@ -34,7 +33,7 @@ def allocate(orderid: str, sku: str, qty: int, uow: unit_of_work.AbstractProduct
             raise InvalidSku(f"Invalid sku {line.sku}")
         batchref = product.allocate(line)
         uow.commit()
-    return batchref
+        return batchref
 
 
 def deallocate(orderid: str, sku: str, qty: int, ref: str, uow: unit_of_work.AbstractProductUnitOfWork) -> model.Batch:
@@ -45,4 +44,4 @@ def deallocate(orderid: str, sku: str, qty: int, ref: str, uow: unit_of_work.Abs
             raise InvalidSku(f"Invalid sku {line.sku}")
         batch = product.deallocate(line, ref)
         uow.commit()
-    return batch
+        return batch

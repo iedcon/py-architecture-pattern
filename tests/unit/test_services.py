@@ -6,12 +6,13 @@ import pytest
 
 class FakeRepository(repository.AbstractProductRepository):
     def __init__(self, products):
+        super().__init__()
         self._products = set(products)
 
-    def add(self, product):
+    def _add(self, product):
         self._products.add(product)
 
-    def get(self, sku):
+    def _get(self, sku):
         return next((p for p in self._products if p.sku == sku), None)
 
 
@@ -20,7 +21,7 @@ class FakeUnitOfWork(unit_of_work.AbstractProductUnitOfWork):
         self.products = FakeRepository([])
         self.committed = False
 
-    def commit(self):
+    def _commit(self):
         self.committed = True
 
     def rollback(self):
@@ -53,9 +54,9 @@ def test_error_for_invalid_sku():
 def test_error_for_out_of_stock_sku():
     uow = FakeUnitOfWork()
     services.add_batch("b1", "AREALSKU", 10, None, uow)
+    ref = services.allocate("o1", "AREALSKU", 20, uow)
 
-    with pytest.raises(model.OutOfStock, match="Out of stock for sku AREALSKU"):
-        services.allocate("o1", "AREALSKU", 20, uow)
+    assert ref is None
 
 
 def test_allocate_commits():

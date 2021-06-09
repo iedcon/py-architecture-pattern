@@ -41,6 +41,7 @@ def test_uow_can_retrieve_a_batch_add_allocate_to_it(session_factory):
     uow = unit_of_work.ProductUnitOfWork(session_factory)
     with uow:
         product = uow.products.get(sku='HIPSTER-WORKBENCH')
+        print(product.events)
         line = model.OrderLine('o1', 'HIPSTER-WORKBENCH', 10)
         product.allocate(line)
         uow.commit()

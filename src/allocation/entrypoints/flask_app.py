@@ -20,7 +20,7 @@ def add_batch():
         request.json['sku'], 
         request.json['qty'], 
         eta, 
-        uow = unit_of_work.SqlAlchemyUnitOfWork()
+        uow = unit_of_work.ProductUnitOfWork()
     )
     return 'OK', 201
 
@@ -32,7 +32,7 @@ def allocate_endpoint():
             request.json['orderid'],
             request.json['sku'],
             request.json['qty'],
-            unit_of_work.SqlAlchemyUnitOfWork()
+            unit_of_work.ProductUnitOfWork()
         )
     except (model.OutOfStock, services.InvalidSku) as e:
         return jsonify({'message': str(e)}), 400

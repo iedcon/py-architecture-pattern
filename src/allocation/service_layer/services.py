@@ -1,7 +1,6 @@
 from typing import List, Optional
 from datetime import date
 from allocation.domain import model
-from allocation.adapters import repository
 from allocation.service_layer import unit_of_work
 
 
@@ -15,39 +14,35 @@ def is_valid_sku(sku: str, batches: List[model.Batch]) -> bool:
 
 def add_batch(
     ref: str, sku: str, qty: int, eta: Optional[date],
-    uow: unit_of_work.AbstractUnitOfWork
+    uow: unit_of_work.AbstractProductUnitOfWork
 ):
-    with uow:
-        uow.batches.add(model.Batch(ref, sku, qty, eta))
+     with uow:
+        print("!!!!")
+        product = uow.products.get(sku=sku)
+        if product is None:
+            product = model.Product(sku, batches=[])
+            uow.products.add(product)
+        product.batches.append(model.Batch(ref, sku, qty, eta))
         uow.commit()
 
 
-def allocate(orderid: str, sku: str, qty: int, uow: unit_of_work.AbstractUnitOfWork) -> str:
+def allocate(orderid: str, sku: str, qty: int, uow: unit_of_work.AbstractProductUnitOfWork) -> str:
     line = model.OrderLine(orderid, sku, qty)
     with uow:
-        batches = uow.batches.list()
-        if not is_valid_sku(line.sku, batches):
-            raise InvalidSku(f'Invalid sku {line.sku}')
-        batchref = model.allocate(line, batches)
+        product = uow.products.get(sku=line.sku)
+        if product is None:
+            raise InvalidSku(f"Invalid sku {line.sku}")
+        batchref = product.allocate(line)
         uow.commit()
-
     return batchref
 
 
-def deallocate(orderid: str, sku: str, qty: int, ref: str, uow: unit_of_work.AbstractUnitOfWork):
+def deallocate(orderid: str, sku: str, qty: int, ref: str, uow: unit_of_work.AbstractProductUnitOfWork) -> model.Batch:
     line = model.OrderLine(orderid, sku, qty)
     with uow:
-        batch = uow.batches.get(ref)
-        batch.deallocate(line)
+        product = uow.products.get(sku=line.sku)
+        if product is None:
+            raise InvalidSku(f"Invalid sku {line.sku}")
+        batch = product.deallocate(line, ref)
         uow.commit()
-
-
-def reallocate(orderid: str, sku: str, qty: int, uow: unit_of_work.AbstractUnitOfWork):
-    line = model.OrderLine(orderid, sku, qty)
-    with uow:
-        batch = uow.batches.get_by_sku(sku=line.sku)
-        if batch is None:
-            raise InvalidSku(f'Invalid sku {line.sku}')
-        batch.deallocate(line)
-        batch.allocate(line)
-        uow.commit()
+    return batch

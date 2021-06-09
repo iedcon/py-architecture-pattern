@@ -6,22 +6,7 @@ import requests
 
 from allocation import config
 from datetime import date
-
-
-def random_suffix() -> str:
-    return uuid.uuid4().hex[:6]
-
-
-def random_sku(name="") -> str:
-    return f"sku-{name}-{random_suffix()}"
-
-
-def random_batchref(name="") -> str:
-    return f"batch-{name}-{random_suffix()}"
-
-
-def random_orderid(name="") -> str:
-    return f"order-{name}-{random_suffix()}"
+from tests.random_refs import random_sku, random_batchref, random_orderid
 
 
 def post_to_add_batch(ref: str, sku: str, qty: int, eta: Optional[date]):

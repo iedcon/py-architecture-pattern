@@ -4,26 +4,20 @@ from allocation.service_layer import services, unit_of_work
 import pytest
 
 
-class FakeRepository(repository.AbstractRepository):
-    def __init__(self, batches):
-        self._batches = set(batches)
+class FakeRepository(repository.AbstractProductRepository):
+    def __init__(self, products):
+        self._products = set(products)
 
-    def add(self, batch):
-        self._batches.add(batch)
+    def add(self, product):
+        self._products.add(product)
 
-    def get(self, reference):
-        return next(b for b in self._batches if b.reference == reference)
-
-    def get_by_sku(self, sku):
-        return next(b for b in self._batches if b.sku == sku)
-
-    def list(self):
-        return list(self._batches)
+    def get(self, sku):
+        return next((p for p in self._products if p.sku == sku), None)
 
 
-class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
+class FakeUnitOfWork(unit_of_work.AbstractProductUnitOfWork):
     def __init__(self):
-        self.batches = FakeRepository([])
+        self.products = FakeRepository([])
         self.committed = False
 
     def commit(self):
@@ -36,7 +30,7 @@ class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
 def test_add_batch():
     uow = FakeUnitOfWork()
     services.add_batch("b1", "CRUNCHY-ARMCHAIR", 100, None, uow)
-    assert uow.batches.get("b1") is not None
+    assert uow.products.get("CRUNCHY-ARMCHAIR") is not None
     assert uow.committed
 
 
@@ -74,20 +68,7 @@ def test_allocate_commits():
 def test_deallocate():
     uow = FakeUnitOfWork()
     services.add_batch('b1', 'OMINOUS-MIRROR', 100, None, uow)
-    services.allocate('o1', 'OMINOUS-MIRROR', 10, uow)
+    ref = services.allocate('o1', 'OMINOUS-MIRROR', 10, uow)
 
-    batch = uow.batches.get('b1')
-    assert batch.available_quantity == 90
-    services.deallocate('o1', 'OMINOUS-MIRROR', 10, batch.reference, uow)
+    batch = services.deallocate('o1', 'OMINOUS-MIRROR', 10, ref, uow)
     assert batch.available_quantity == 100
-
-
-def test_reallocate():
-    uow = FakeUnitOfWork()
-    services.add_batch('b1', 'OMINOUS-MIRROR', 100, None, uow)
-    services.allocate('o1', 'OMINOUS-MIRROR', 10, uow)
-
-    batch = uow.batches.get('b1')
-    assert batch.available_quantity == 90
-    services.reallocate('o1', 'OMINOUS-MIRROR', 10, uow)
-    assert batch.available_quantity == 90

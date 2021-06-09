@@ -1,6 +1,44 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import List, Optional
 from datetime import date
+
+
+class OutOfStock(Exception):
+    pass
+
+
+class NotAllocated(Exception):
+    pass
+
+
+class Product:
+    def __init__(self, sku: str, batches: List[Batch], version_number: int = 0):
+        self.sku = sku
+        self.batches = batches
+        self.version_number = version_number
+
+    def allocate(self, line: OrderLine) -> str:
+        try:
+            batch = next(
+                b for b in sorted(self.batches) if b.can_allocate(line)
+            )
+            batch.allocate(line)
+            self.version_number += 1
+            return batch.reference
+        except StopIteration:
+            raise OutOfStock(f'Out of stock for sku {line.sku}')
+
+    def deallocate(self, line: OrderLine, ref: str):
+        try:
+            batch = next(
+                b for b in sorted(self.batches) if b.reference == ref
+            )
+            batch.deallocate(line)
+            return batch
+        except StopIteration:
+            raise NotAllocated(f'Not allocated sku {line.sku}')
 
 
 @dataclass(unsafe_hash=True)
@@ -51,18 +89,3 @@ class Batch:
 
     def can_allocate(self, line: OrderLine) -> bool:
         return self.sku == line.sku and self.available_quantity >= line.qty
-
-
-class OutOfStock(Exception):
-    pass
-
-
-def allocate(line: OrderLine, batches: List[Batch]) -> str:
-    try:
-        batch = next(
-            b for b in sorted(batches) if b.can_allocate(line)
-        )
-        batch.allocate(line)
-        return batch.reference
-    except StopIteration:
-        raise OutOfStock(f'Out of stock for sku {line.sku}')

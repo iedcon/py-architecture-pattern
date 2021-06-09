@@ -7,10 +7,10 @@ from allocation.adapters import repository
 from allocation import config
 
 
-class AbstractUnitOfWork(abc.ABC):
-    batches: repository.AbstractRepository
+class AbstractProductUnitOfWork(abc.ABC):
+    products: repository.AbstractProductRepository
 
-    def __enter__(self) -> AbstractUnitOfWork:
+    def __enter__(self) -> AbstractProductUnitOfWork:
         return self
 
     def __exit__(self, *args):
@@ -26,17 +26,20 @@ class AbstractUnitOfWork(abc.ABC):
 
 
 DEFAULT_SESSION_FACTORY = sessionmaker(
-    bind=create_engine(config.get_postgres_uri())
+    bind=create_engine(
+        config.get_postgres_uri(),
+        isolation_level="REPEATABLE READ",
+    )
 )
 
-class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
+class ProductUnitOfWork(AbstractProductUnitOfWork):
 
     def __init__(self, session_factory=DEFAULT_SESSION_FACTORY):
         self.session_factory = session_factory
 
     def __enter__(self):
         self.session = self.session_factory()
-        self.batches = repository.SqlAlchemyRepository(self.session)
+        self.products = repository.ProductRepository(self.session)
         return super().__enter__()
 
     def __exit__(self, *args):

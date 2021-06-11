@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, request
-from sqlalchemy import create_engine
 from datetime import datetime
 
 from allocation.domain import model, events

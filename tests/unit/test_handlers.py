@@ -1,5 +1,4 @@
-from src.allocation.service_layer import handlers
-from allocation.domain import events, commands
+from allocation.domain import commands
 from allocation.adapters import repository
 from allocation.service_layer import handlers, unit_of_work, messagebus
 from unittest import mock

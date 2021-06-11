@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional
 from datetime import date
-from allocation.domain import events
+from allocation.domain import events, commands
 
 
 class OutOfStock(Exception):
@@ -28,6 +28,12 @@ class Product:
             )
             batch.allocate(line)
             self.version_number += 1
+            self.events.append(events.Allocated(
+                orderid=line.orderid,
+                sku=line.sku,
+                qty=line.qty,
+                batchref=batch.reference,
+            ))
             return batch.reference
         except StopIteration:
             self.events.append(events.OutOfStock(line.sku))
@@ -39,7 +45,7 @@ class Product:
         while batch.available_quantity < 0:
             line = batch.deallocate_one()
             self.events.append(
-                events.AllocationRequired(line.orderid, line.sku, line.qty)
+                commands.Allocate(line.orderid, line.sku, line.qty)
             )
 
 

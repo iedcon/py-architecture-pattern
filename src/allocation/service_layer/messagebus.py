@@ -12,9 +12,7 @@ Message = Union[commands.Command, events.Event]
 
 EVENT_HANDLERS = {
     events.OutOfStock: [handlers.send_out_of_stock_notification],
-    events.BatchCreated: [handlers.add_batch],
-    events.AllocationRequired: [handlers.allocate],
-    events.BatchQuantityChanged: [handlers.change_batch_quantity],
+    events.Allocated: [handlers.publish_allocated_event],
 }
 
 COMMAND_HANDLERS = {

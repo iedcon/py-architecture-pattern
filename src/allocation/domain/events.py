@@ -8,26 +8,13 @@ class Event:
 
 
 @dataclass
-class BatchCreated(Event):
-    ref: str
+class OutOfStock(Event):
     sku: str
-    qty: int
-    eta: Optional[date] = None
 
 
 @dataclass
-class AllocationRequired(Event):
+class Allocated(Event):
     orderid: str
     sku: str
     qty: int
-
-
-@dataclass
-class BatchQuantityChanged(Event):
-    ref: str
-    qty: int
-
-
-@dataclass
-class OutOfStock(Event):
-    sku: str
+    batchref: str

@@ -33,12 +33,12 @@ def get_allocated_batch_ref(session, orderid: str, sku: str) -> str:
     return batchref
 
 
-def test_uow_can_retrieve_a_batch_add_allocate_to_it(session_factory):
-    session = session_factory()
+def test_uow_can_retrieve_a_batch_add_allocate_to_it(sqlite_session_factory):
+    session = sqlite_session_factory()
     insert_batch(session, 'batch1', 'HIPSTER-WORKBENCH', 100, None)
     session.commit()
 
-    uow = unit_of_work.ProductUnitOfWork(session_factory)
+    uow = unit_of_work.ProductUnitOfWork(sqlite_session_factory)
     with uow:
         product = uow.products.get(sku='HIPSTER-WORKBENCH')
         print(product.events)

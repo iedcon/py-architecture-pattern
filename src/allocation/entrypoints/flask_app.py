@@ -5,6 +5,7 @@ from allocation.domain import commands
 from allocation.adapters import orm
 from allocation.service_layer import messagebus, unit_of_work
 from allocation.service_layer.handlers import InvalidSku
+from allocation import views
 
 
 app = Flask(__name__)
@@ -33,9 +34,17 @@ def allocate_endpoint():
             request.json['sku'],
             request.json['qty'],
         )
-        results = messagebus.handle(cmd, unit_of_work.ProductUnitOfWork())
-        batchref = results.pop(0)
+        messagebus.handle(cmd, unit_of_work.ProductUnitOfWork())
     except InvalidSku as e:
         return jsonify({'message': str(e)}), 400
 
-    return jsonify({'batchref': batchref}), 201
+    return "OK", 202
+
+
+@app.route("/allocations/<orderid>", methods=['GET'])
+def allocations_view_endpoint(orderid: str):
+    uow = unit_of_work.ProductUnitOfWork()
+    result = views.allocations(orderid, uow)
+    if not result:
+        return 'not found', 404
+    return jsonify(result), 200
